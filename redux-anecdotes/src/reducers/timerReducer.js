@@ -1,10 +1,14 @@
+/* With the help of this reducer, 
+   the notification always stays up the right amount of time (5 secs), 
+   and doesnt vanish too quickly if user clicks the vote buttons fast.
+   The timer is cleared and set again everytime a new vote is submitted.
+*/
+
 const timerReducer = (state = null, action) => {
   switch(action.type) {
     case 'SET_TIMER':
-      return action.data.timer
-    case 'RESET_TIMER':
       clearTimeout(state)
-      return action.data.timer
+      return action.data
     default:
       return state
   }
@@ -13,14 +17,7 @@ const timerReducer = (state = null, action) => {
 export const setTimer = (timer) => {
   return {
     type: 'SET_TIMER',
-    data: { timer }
-  }
-}
-
-export const resetTimer = () => {
-  return {
-    type: 'RESET_TIMER',
-    data: { timer: null }
+    data: timer
   }
 }
   

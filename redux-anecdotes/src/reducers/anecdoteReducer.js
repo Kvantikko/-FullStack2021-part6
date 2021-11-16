@@ -1,42 +1,18 @@
-const anecdotesAtStart = [
-  'If it hurts, do it more often',
-  'Adding manpower to a late software project makes it later!',
-  'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-  'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-  'Premature optimization is the root of all evil.',
-  'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
-]
+import anecdoteService from '../services/anecdotes'
 
-const getId = () => (100000 * Math.random()).toFixed(0)
-
-const asObject = (anecdote) => {
-  return {
-    content: anecdote,
-    id: getId(),
-    votes: 0
-  }
-}
-
-const initialState = anecdotesAtStart.map(asObject)
-
-const reducer = (state = initialState, action) => {
-  //console.log('state now: ', state)
-  //console.log('action', action)
+const anecdoteReducer = (state = [], action) => {
+  console.log('state now: ', state)
+  console.log('action', action)
   
-  switch(action.type) {
+  switch (action.type) {
+    case 'INIT_ANECDOTES':
+      return sort(action.data)
     case 'VOTE':
-      const id = action.data.id
-      const anecdoteToChange = state.find(a => a.id === id)
-      const changedAnecdote = { 
-        ...anecdoteToChange, 
-        votes: anecdoteToChange.votes + 1
-      }
-      return state
-        .map(anecdote =>
-          anecdote.id !== id ? anecdote : changedAnecdote)
-        .sort((a, b) => {
-          return b.votes - a.votes
-        })
+      const voteAnecdote = action.data
+      return sort(
+        state.map(anecdote =>
+          anecdote.id !== voteAnecdote.id ? anecdote : voteAnecdote)
+      )
     case 'NEW_ANECDOTE':
       return state.concat(action.data)
     default:
@@ -44,22 +20,43 @@ const reducer = (state = initialState, action) => {
   }
 }
 
+const sort = array =>
+  array.sort((a, b) => {
+    return b.votes - a.votes
+  })
+
+export const initializeAnecdotes = () => {
+  return async dispatch => {
+    const anecdotes = await anecdoteService.getAll()
+    dispatch({
+      type: 'INIT_ANECDOTES',
+      data: anecdotes
+    })
+  }
+}
+
 export const vote = (id) => {
-  return {
-    type: 'VOTE',
-    data: { id }
+  return async dispatch => {
+    const anecdotes = await anecdoteService.getAll()
+    const anecdoteToLike = anecdotes.find(a => a.id === id)
+    const changedAnecdote = { ...anecdoteToLike, votes: anecdoteToLike.votes + 1}
+    const updatedAnecdote = await anecdoteService.update(id, changedAnecdote)
+    
+    dispatch({
+      type:'VOTE',
+      data: updatedAnecdote
+    })
   }
 }
 
-export const create = (content) => {
-  return {
-    type: 'NEW_ANECDOTE',
-    data: {
-      content,
-      id: getId(),
-      votes: 0
-    }
+export const createAnecdote = (content) => {
+  return async dispatch => {
+    const newAnecdote = await anecdoteService.createNew(content)
+    dispatch({
+      type: 'NEW_ANECDOTE',
+      data: newAnecdote 
+    })
   }
 }
 
-export default reducer
+export default anecdoteReducer

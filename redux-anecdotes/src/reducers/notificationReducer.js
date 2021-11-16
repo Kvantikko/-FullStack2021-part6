@@ -1,3 +1,5 @@
+import { setTimer } from '../reducers/timerReducer' // for notifaction
+
 const notificationReducer = (state = null, action) => {
     switch (action.type) {
       case 'SET_NOTIFICATION':    
@@ -9,10 +11,18 @@ const notificationReducer = (state = null, action) => {
     }
   }
 
-  export const setNotification = message => {
-    return {
-      type: 'SET_NOTIFICATION',
-      data: { message }
+  export const setNotification = (message, time) => {
+    return async dispatch => {
+      const timer = setTimeout(() => {
+        dispatch(dismissNotification())
+        dispatch(setTimer(null))
+      }, time * 1000) 
+      dispatch(setTimer(timer))
+      
+      dispatch({
+        type: 'SET_NOTIFICATION',
+        data: { message }
+      })
     }
   }
 
