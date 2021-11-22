@@ -9,7 +9,7 @@ const filterReducer = (state = '', action) => {
     }
   }
     
-  export const setFilter= (content) => {
+  export const setFilter = (content) => {
     return {
       type: 'SET_FILTER',
       data: { content }

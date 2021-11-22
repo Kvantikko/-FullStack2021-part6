@@ -1,4 +1,4 @@
-import { setTimer } from '../reducers/timerReducer' // for notifaction
+import { setTimer } from '../reducers/timerReducer'
 
 const notificationReducer = (state = null, action) => {
     switch (action.type) {
